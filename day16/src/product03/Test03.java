@@ -1,0 +1,631 @@
+package product03;
+
+import java.io.FileNotFoundException;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.InputMismatchException;
+import java.util.List;
+import java.util.Scanner;
+
+class Product {
+	private int num; // PK
+	private String name; // 이름
+	private int price; // 가격
+	private int cnt; // 재고
+	
+	Product(int num, String name, int price, int cnt) { // 상품 추가
+		this.num = num;
+		this.name = name;
+		this.price = price;
+		this.cnt = cnt;
+		System.out.println("[" + this.name + "] 상품이 추가되었습니다.");
+	}
+
+	void sell(int cnt) { // 상품 구매
+		this.cnt -= cnt;
+		System.out.println("\n[" + this.name + "] X [" + cnt + "개] 총가격 : " + this.price * cnt + "원");
+		System.out.println("구매완료되었습니다.");
+	}
+	
+	void editCnt(int cnt, boolean flag) { // 상품재고 변경
+		if (flag) {
+			this.cnt += cnt;
+			System.out.println("\n[" + this.name + "] 재고가 [" + cnt + "개] 추가되었습니다.");			
+		} else {
+			this.cnt -= cnt;
+			System.out.println("\n[" + this.name + "] 재고가 [" + cnt + "개] 감소되었습니다.");	
+		}
+	}
+	
+	public int getNum() {
+		return num;
+	}
+
+	public void setNum(int num) {
+		this.num = num;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public int getPrice() {
+		return price;
+	}
+
+	public void setPrice(int price) {
+		this.price = price;
+	}
+
+	public int getCnt() {
+		return cnt;
+	}
+
+	public void setCnt(int cnt) {
+		this.cnt = cnt;
+	}
+
+	@Override
+	public String toString() { // 상품 정보
+		if (this.cnt == 0) { // 재고가 0개이면
+			return " [" + this.num + "] | [ " + this.name + " ] [ " + this.price + "원 ] [ 품절 ]";
+		}
+		return " [" + this.num + "] | [ " + this.name + " ] [ " + this.price + "원 ] [ " + this.cnt + "개 ]";
+	}
+
+}
+
+public class Test03 {
+	
+	private static Scanner sc = new Scanner(System.in);
+
+	public static int tryCatchInputMismatch() { // 정수입력일때 문자입력시 예외처리
+		try {
+			printInputMsg();
+			int action = sc.nextInt();
+			return action;
+		} catch (InputMismatchException e) {
+			sc.nextLine();
+			return -1;
+		}
+	}
+	
+	public static void printUserMenu() { // 사용자메뉴
+		String userMenu = "\n=============메뉴=============\n"
+						+ "1. 상품목록출력\n"
+						+ "2. 구매하기\n"
+						+ "3. 프로그램종료\n"
+						+ "=============================";
+		System.out.println(userMenu);
+	}
+	
+	public static void printAdminMenu() { // 관리자메뉴
+		String adminMenu = "\n===========관리메뉴============\n"
+						 + "1. 상품추가\n"
+						 + "2. 상품재고변경\n"
+						 + "3. 상품삭제\n"
+						 + "4. 관리자모드종료\n"
+						 + "5. 프로그램종료\n"
+						 + "=============================";
+		System.out.println(adminMenu);
+	}
+	
+	public static void printStartList() { // 상품목록 상단
+		String startList = "\n-상품번호-|-----------상품 목록---------------------";
+		System.out.println(startList);
+	}
+	
+	public static void printEndList() { // 상품목록 하단
+		String endList = "--------|--------------------------------------";
+		System.out.println(endList);
+	}
+	
+	public static void printInputMsg() { // 입력 메세지
+		String line = "----------------------------";
+		String input = "\n입력) ";
+		System.out.print(line + input);
+	}
+	
+	public static void printMoveMenuMsg() { // 0입력시 메뉴이동 안내 메세지
+		String moveMenuMsg = "(메뉴로 돌아가려면 0을 입력해주세요)";
+		System.out.println(moveMenuMsg);
+	}
+	
+	public static void printReTryIntMsg() { // 정수 입력 안내 메세지
+		String reTryIntMsg = "\n정수를 입력해주세요";
+		System.out.println(reTryIntMsg);
+	}
+	
+	public static void printReTryMsg() { // 재입력 안내 메세지
+		String reTryMsg = "\n다시 입력해주세요";
+		System.out.println(reTryMsg);
+	}
+	
+	public static void printYesOrNoMsg() { // 선택 안내 메세지
+		String yesOrNoMsg = "YES (1) NO (2) ";
+		System.out.println(yesOrNoMsg);
+	}
+	
+	public static void printCheckInsertProduct(int num, String name, int price, int cnt) { // 상품 추가 확인 안내 메세지
+		String str = "\n============================"
+				+ "\n상품번호 : " + num 
+				+ "\n상품이름 : " + name 
+				+ "\n상품가격 : " + price 
+				+ "\n 재고   : " + cnt
+				+ "\n============================"
+				+ "\n상품을 추가하시겠습니까?";
+		System.out.println(str);
+	}
+	
+	public static void printCheckSell(ArrayList<Product> arrlist, int index, int cnt) { // 상품 구매 확인 안내 메세지
+		String str = "\n[" + arrlist.get(index).getName() + "] X [" + cnt + "개] 총가격 : " + (arrlist.get(index).getPrice() * cnt) + "원"
+				   + "\n구매하시겠습니까?";
+		System.out.println(str);
+	}
+	
+	public static void printCheckInput(String value) { // 상품이름 확인 안내 메세지
+		System.out.println("\n상품이름 [" + value + "] 이(가) 맞습니까?");			
+	}
+	
+	public static void printCheckInput(int num, int value) { // 상품가격, 상품재고 확인 안내 메세지
+		if (num == 1) {
+			System.out.println("\n상품가격 [" + value + "원] 이(가) 맞습니까?");			
+		} else if (num == 2) {
+			System.out.println("\n상품재고 [" + value + "개] 이(가) 맞습니까?");			
+		}
+		
+	}
+	
+	public static void printRemoveMsg(int num, String name) { // 상품 삭제 완료 메세지
+		System.out.println("\n[" + num + "] [" + name + "] 상품이 삭제되었습니다.");
+	}
+
+	public static void printEmptyMsg() { // 상품목록에 생성된 상품이 없는 안내 메세지
+		String isEmptyMsg = "\n존재하는 상품이 없습니다.";
+		System.out.println(isEmptyMsg);
+	}
+	
+	public static void printIsNotNumMsg(int num) { // 상품목록에 해당 상품번호가 존재하지 않는 안내 메세지
+		String isNotMsg = "\n" + num + "번은 존재하지 않는 상품번호입니다.";
+		System.out.println(isNotMsg);
+	}
+	
+	public static boolean isArrayEmpty(ArrayList<Product> arrlist) { // 상품목록이 생성된 상품이 없어 비어있는지 확인
+		if (arrlist.isEmpty()) {
+			printEmptyMsg();
+			return true;
+		}
+		return false;
+	}
+	
+	// 상품목록에 해당 상품번호가 존재하는지 유무와 존재한다면 해당 상품번호의 인덱스번호 가져오기
+	public static List<Object> existsProduct(ArrayList<Product> arrlist, int num, boolean flag, int index) {
+		for (Product product : arrlist) {
+			if (product.getNum() == num) {
+				flag = true;
+				System.out.println("\n" + product);
+				break;
+			}
+			index++;
+		}
+		return Arrays.asList(flag, index);
+	}
+	
+	public static boolean isCheckAction() { // 선택 안내 메세지 입력 결과 확인 (1일때 true, 2일때 false)
+		boolean flag = false;
+		while (true) {
+			printYesOrNoMsg();
+			printInputMsg();
+			int action = sc.nextInt();
+			if (action != 1 && action != 2) {
+				printReTryMsg();
+				continue;
+			} else if (action == 1) {
+				flag = true;
+			}
+			break;
+		}
+		return flag;
+	}
+	
+	public static void printCheckEditCnt(ArrayList<Product> arrlist, int index, int cnt, boolean flag) { // 상품재고변경 확인 안내 메세지
+		System.out.println("\n" + arrlist.get(index).getName() + "을(를) " + cnt + "개 " + (flag ? "증가" : "감소") + "시키시겠습니까?");
+	}
+	
+	public static void sleepThread(long millis) { // 스레드
+		try {
+			Thread.sleep(millis);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	// 프로그램 종료시 상품목록 파일저장
+	public static void saveFile(String path_START, String path_FILE, String path_END, ArrayList<Product> arrlist) {
+		try {
+			FileWriter fw = new FileWriter(path_START + path_FILE + path_END);
+			int i = 0;
+			while (i < arrlist.size()) {
+				fw.write(arrlist.get(i).getNum() + "번 ");
+				fw.write(arrlist.get(i).getName() + " ");
+				fw.write(arrlist.get(i).getPrice() + "원 ");
+				fw.write(arrlist.get(i).getCnt() + "개\n");
+				i++;
+			}
+			fw.flush();
+			fw.close();
+			
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public static void main(String[] args) {
+		
+		Scanner sc = new Scanner(System.in);
+		ArrayList<Product> data = new ArrayList<Product>();
+		
+		int action; // 입력할 메뉴 번호
+		int pkNum = 1001; // 상품번호 101번부터 순서대로 부여
+		int num = 0; // 상품 번호
+		String name = ""; // 상품 이름
+		int price = 0; // 상품 가격
+		int cnt = 0; // 상품 재고
+		int pIndex = 0; // 해당 상품인덱스
+		boolean hasNum = false; // 상품 존재여부
+		boolean flagNum = false; // 상품 번호 flag
+		boolean flagName = false; // 상품 이름 flag
+		boolean flagPrice = false; // 상품 가격 flag
+		boolean flagCnt = false; // 상품 재고 flag
+		boolean flagEditType = false; // 상품재고 변경방식 flag
+		boolean flagEditCnt = false; // 상품재고 변경개수 flag
+		boolean flagAddSub = false; // 상품재고 증가 감소 flag
+		boolean flagExit = false; // 프로그램종료 flag
+		boolean flagExe = false; // 실행 flag
+		
+		final String path_START = "D:\\KIM\\resource\\";
+		final String path_FILE = "test";
+		final String path_END = ".txt";
+		
+		/* test data */
+		data.add(new Product(pkNum++, "새우깡", 2500, 17));
+		data.add(new Product(pkNum++, "감자깡", 3400, 43));
+		data.add(new Product(pkNum++, "칙촉", 1700, 26));
+		data.add(new Product(pkNum++, "빈츠", 2100, 12));
+		data.add(new Product(pkNum++, "콜라", 3700, 0));
+		
+		while (true) {
+			if (flagExit) { // 프로그램 종료시
+				saveFile(path_START, path_FILE, path_END, data); // 상품목록 파일 생성
+				System.out.println("\n프로그램을 종료합니다.");
+				break;
+			}
+			sleepThread(1500);
+			printUserMenu(); // 사용자메뉴 출력
+			action = tryCatchInputMismatch();
+			if (action == 1) { // 1번 입력시 상품목록출력
+				if (isArrayEmpty(data)) { // 생성된 상품여부 확인
+					continue;
+				}
+				printStartList();
+				for (Product product : data) { // 상품 목록 출력
+					System.out.println(product);
+				}
+				printEndList();
+			} else if (action == 2) { // 2번 입력시 상품구매
+				if (isArrayEmpty(data)) { // 생성된 상품여부 확인
+					continue;
+				}
+				
+				while (true) {
+					hasNum = false;
+					flagNum = false;
+					pIndex = 0;
+					/* 초기화 */
+					flagCnt = false;
+					flagExe = false;
+					System.out.println("\n구매하실 상품번호를 입력해주세요.");
+					printMoveMenuMsg();
+					num = tryCatchInputMismatch(); // 상품번호 입력
+					if (num == 0) { // 상품번호 0번 입력시 메뉴이동
+						break;
+					} else if (num < 1) { // 상품번호 1미만 입력시 재입력
+						printReTryMsg();
+						continue;
+					}
+					List<Object> res = existsProduct(data, num, hasNum, pIndex);
+					hasNum = (boolean)res.get(0); // 해당상품 존재 여부
+					pIndex = (int)res.get(1); // 해당상품 인덱스
+					if (!hasNum) { // 해당상품이 존재하지 않는다면
+						printIsNotNumMsg(num);
+						continue;
+					}
+					if (data.get(pIndex).getCnt() == 0) { // 상품재고가 0이라면
+						System.out.println("\n품절된 상품입니다.");
+						continue;
+					}
+					System.out.println("\n구매하실 상품이 맞습니까?");
+					flagNum = isCheckAction(); // 구매상품 확인
+					if (flagNum) { // 구매할 상품이 맞다면
+						break;
+					}
+				}
+				
+				while (flagNum) {
+					flagCnt = false;
+					System.out.println("\n구매하실 상품수량을 입력해주세요.");
+					printMoveMenuMsg();
+					cnt = tryCatchInputMismatch(); // 구매수량 입력
+					if (cnt == 0) { // 구매수량 0번 입력시 메뉴이동
+						break;
+					} else if (cnt < 1) { // 구매수량 1미만 입력시 재입력
+						printReTryMsg();
+						continue;
+					} else if (cnt > data.get(pIndex).getCnt()) { // 구매수량이 상품재고보다 많으면
+						System.out.println("\n구매수량이 재고보다 많습니다.");
+						continue;
+					}
+					System.out.println("\n구매하실 수량이 [" + cnt + "개] 가 맞습니까?");
+					flagCnt = isCheckAction(); // 구매수량 확인
+					if (flagCnt) { // 구매수량이 맞다면
+						break;
+					}
+				}
+				
+				if (flagNum && flagCnt) { // 상품번호와 구매수량이 맞다면
+					flagExe = false;
+					printCheckSell(data, pIndex, cnt);
+					flagExe = isCheckAction(); // 상품구매 확정 확인
+				}
+				
+				if (flagExe) { // 상품구매 확정
+					data.get(pIndex).sell(cnt); // 상품구매
+				}
+				
+			} else if (action == 1234) { // 1234 입력시 관리자메뉴로 이동
+				System.out.println("\n관리자모드로 이동합니다.");
+				while (true) {
+					sleepThread(1500);
+					printAdminMenu(); // 관리자메뉴 출력
+					action = tryCatchInputMismatch();
+					if (action == 1) { // 1번 입력시 상품추가
+						
+						while (true) {
+							flagName = false;
+							/* 초기화 */
+							flagPrice = false;
+							flagCnt = false;
+							flagExe = false;
+							System.out.println("\n추가할 상품이름을 입력해주세요");
+							printMoveMenuMsg();
+							printInputMsg();
+							name = sc.next(); // 상품이름 입력
+							if (name.equals("0")) { // 상품이름 0번 입력시 메뉴이동
+								break;
+							}
+							printCheckInput(name); 
+							flagName = isCheckAction(); // 상품이름 확인
+							if (flagName) { // 상품이름이 맞다면
+								break;
+							}
+						}
+						
+						while (flagName) {
+							flagPrice = false;
+							System.out.println("\n추가할 상품가격을 입력해주세요");
+							printMoveMenuMsg();
+							price = tryCatchInputMismatch(); // 상품가격 입력
+							if (price == 0) { // 상품가격 0번 입력시 메뉴이동
+								break;
+							} else if (price < 1) { // 상품가격 1미만 입력시 재입력
+								System.out.println("\n상품가격은 1원 이상 입력해주세요.");
+								continue;
+							}
+							printCheckInput(1, price);
+							flagPrice = isCheckAction(); // 상품가격 확인
+							if (flagPrice) { // 상품가격이 맞다면
+								break;
+							}
+						}
+						
+						while (flagPrice) {
+							flagCnt = false;
+							System.out.println("\n추가할 상품재고를 입력해주세요");
+							printMoveMenuMsg();
+							cnt = tryCatchInputMismatch(); // 상품재고 입력
+							if (cnt == 0) { // 상품재고 0번 입력시 메뉴이동
+								break;
+							} else if (cnt < 1) { // 상품재고 1미만 입력시 재입력
+								System.out.println("\n상품재고는 1개 이상 입력해주세요");
+								continue;
+							}
+							printCheckInput(2, cnt);
+							flagCnt = isCheckAction(); // 상품재고 확인
+							if (flagCnt) { // 상품재고가 맞다면
+								break;
+							}
+						}
+						
+						if (flagName && flagPrice && flagCnt) { // 상품이름, 상품가격, 상품재고가 맞다면
+							flagExe = false;
+							printCheckInsertProduct(pkNum, name, price, cnt);
+							flagExe = isCheckAction(); // 상품추가 확정 확인
+						}
+						
+						if (flagExe) { // 상품추가
+							data.add(new Product(pkNum++, name, price, cnt)); // 상품 생성시 pkNum 증가	
+						}
+					} else if (action == 2) { // 2번 입력시 상품재고변경
+						if (isArrayEmpty(data)) { // 생성된 상품여부 확인
+							continue;
+						}
+						while (true) {
+							hasNum = false;
+							flagNum = false;
+							pIndex = 0;
+							/* 초기화 */
+							flagEditType = false;
+							flagAddSub = false;
+							flagEditCnt = false;
+							flagExe = false;
+							System.out.println("\n재고를 변경할 상품 번호를 입력해주세요)");
+							printMoveMenuMsg();
+							num = tryCatchInputMismatch(); // 상품번호 입력
+							if (num == 0) { // 상품번호 0번 입력시 메뉴이동
+								break;
+							} else if (num < 1) { // 상품번호 1미만 입력시 재입력
+								printReTryMsg();
+								continue;
+							}
+							List<Object> res = existsProduct(data, num, hasNum, pIndex);
+							hasNum = (boolean)res.get(0); // 해당상품 존재 여부
+							pIndex = (int)res.get(1); // 해당상품 인덱스
+							if (!hasNum) { // 해당상품이 존재하지 않는다면
+								printIsNotNumMsg(num);
+								continue;
+							}
+							System.out.println("\n재고를 변경할 상품이 맞습니까?");
+							flagNum = isCheckAction(); // 변경상품 확인
+							if (flagNum) { // 변경할 상품이 맞다면
+								break;
+							}
+						}
+						
+						while (flagNum) {
+							flagEditType = false;
+							flagAddSub = false;
+							System.out.println("\n변경할 방식을 선택해주세요.");
+							while (true) {
+								System.out.println("재고추가 (1) 재고감소 (2)");
+								action = tryCatchInputMismatch(); // 방식 입력
+								if (action != 1 && action != 2) {
+									printReTryMsg();
+									continue;
+								} else if (action == 1) { // 재고추가
+									flagAddSub = true;
+								} else { // 재고감소
+									flagAddSub = false;
+									if (data.get(pIndex).getCnt() == 0) { // 해당상품 재고가 0이라면
+										System.out.println("\n품절상품은 재고감소를 할 수 없습니다.");
+										continue;
+									}
+								}
+								flagEditType = true;
+								break;
+							}
+							if (flagEditType) { // 변경 방식을 선택했다면
+								break;
+							}
+						}
+						
+						while (flagEditType) {
+							flagEditCnt = false;
+							if (flagAddSub) { // 재고추가시
+								System.out.println("\n추가 수량을 입력해주세요");
+							} else { // 재고감소시
+								System.out.println("\n감소 수량을 입력해주세요");
+							}
+							printMoveMenuMsg();
+							cnt = tryCatchInputMismatch(); // 변경수량 입력
+							if (cnt == 0) { // 0 입력시 메뉴이동
+								break;
+							} else if (cnt < 1) { // 변경수량 1미만 입력시 재입력
+								System.out.println("\n1 이상 입력해주세요");
+								continue;
+								// 재고감소시 감소수량이 상품재고보다 많으면
+							} else if (!flagAddSub && (data.get(pIndex).getCnt() - cnt < 0)) { 
+								System.out.println("\n감소시킬 수량이 현재재고보다 많습니다.");
+								continue;
+							}
+							flagEditCnt = true;
+							break;
+						}
+						
+						if (flagNum && flagEditType && flagEditCnt) { // 상품번호, 변경방식, 변경수량이 맞으면
+							flagExe = false;
+							printCheckEditCnt(data, pIndex, cnt, flagAddSub);
+							flagExe = isCheckAction(); // 상품변경 확정 확인
+						}
+						
+						if (flagExe) { // 상품변경 확정
+							data.get(pIndex).editCnt(cnt, flagAddSub); // 상품변경
+							System.out.println(data.get(pIndex));
+						}
+						
+					} else if (action == 3) { // 3번 입력시 상품삭제
+						if (isArrayEmpty(data)) { // 생성된 상품여부 확인
+							continue;
+						}
+						while (true) {
+							hasNum = false;
+							flagNum = false;
+							pIndex = 0;
+							/* 초기화 */
+							flagExe = false;
+							System.out.println("\n삭제할 상품 번호를 입력해주세요");
+							printMoveMenuMsg();
+							num = tryCatchInputMismatch(); // 상품번호 입력
+							if (num == 0) { // 상품번호 0번 입력시 메뉴이동
+								break;
+							} else if (num < 1) { // 상품번호 1미만 입력시 재입력
+								printReTryMsg();
+								continue;
+							}
+							List<Object> res = existsProduct(data, num, hasNum, pIndex);
+							hasNum = (boolean) res.get(0); // 해당상품 존재 여부
+							pIndex = (int) res.get(1); // 해당상품 인덱스
+							if (!hasNum) { // 해당상품이 존재하지 않는다면
+								printIsNotNumMsg(num);
+								continue;
+							}
+							System.out.println("\n삭제할 상품이 맞습니까?");
+							flagNum = isCheckAction(); // 삭제할 상품번호 확인
+							if (flagNum) {
+								break;
+							}
+						}
+						
+						while (flagNum) {
+							flagExe = false;
+							System.out.println("\n상품을 삭제하시겠습니까?");
+							flagExe = isCheckAction(); // 상품삭제 확정 확인
+							break;
+						}
+						
+						if (flagNum && flagExe) { // 상품번호, 상품삭제 확정
+							printRemoveMsg(data.get(pIndex).getNum(), data.get(pIndex).getName());
+							data.remove(pIndex); // 상품삭제
+						}
+						
+					} else if (action == 4) { // 4번 입력시 관리자모드 종료
+						System.out.println("\n사용자모드로 이동합니다.");
+						break;
+					} else if (action == 5) { // 5번 입력시 프로그램종료
+						flagExit = true;
+						break;
+					} else if (action == -1) { // 예외처리시
+						printReTryIntMsg();
+					} else {
+						printReTryMsg();
+					}
+				}
+			} else if (action == 3) { // 3번 입력시 프로그램종료
+				flagExit = true;
+			} else if (action == -1) { // 예외처리시
+				printReTryIntMsg();
+			} else {
+				printReTryMsg();
+			}
+		}
+		
+	}
+	
+}
